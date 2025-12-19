@@ -16,7 +16,9 @@ EXPOSE 8080
 
 # Mongo env vars
 ENV MONGO=true
-ENV MONGO_URL="mongodb:27017/catalogue"
+ENV MONGO_URL=""mongodb://mongodb:27017/catalogue""
 
 # Start catalogue service
 CMD ["node", "server.js"]
+
+
