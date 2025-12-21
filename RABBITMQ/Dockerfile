@@ -1,3 +1,2 @@
 FROM rabbitmq:3-management
-RABBITMQ_DEFAULT_USER=roboshop
-RABBITMQ_DEFAULT_PASS=roboshop123
+
