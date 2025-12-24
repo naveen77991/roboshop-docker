@@ -1,41 +1,18 @@
-############################
-# Stage 1 – Build
-############################
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Dependency layer (cached)
-COPY package*.json ./
-RUN npm install --only=production
-
-# App code
-COPY server.js .
-
-############################
-# Stage 2 – Runtime
-############################
 FROM node:20-alpine
 
-# Create roboshop non-root user
-RUN addgroup -S roboshop && adduser -S roboshop -G roboshop
-
 WORKDIR /app
 
-# Copy app from builder
-COPY --from=builder /app /app
+# 1️⃣ Copy only dependency files first (BEST PRACTICE)
+COPY package*.json ./
 
-# Ownership to roboshop user
-RUN chown -R roboshop:roboshop /app
+# 2️⃣ Install dependencies
+RUN npm install
 
-# Switch to non-root user
-USER roboshop
+# 3️⃣ Copy remaining application code
+COPY . .
 
 EXPOSE 8080
 
-############################
-# Frequently changing configs (KEEP AT BOTTOM)
-############################
 ENV MONGO=true
 ENV MONGO_URL=mongodb://mongodb:27017/catalogue
 
