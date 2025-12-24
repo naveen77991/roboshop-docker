@@ -1,24 +1,42 @@
-FROM node:20
+############################
+# Stage 1 – Build
+############################
+FROM node:20-alpine AS builder
 
-# App work directory
 WORKDIR /app
 
-# Dependencies first (best practice – layer cache)
-COPY package*.json .
+# Dependency layer (cached)
+COPY package*.json ./
+RUN npm install --only=production
+
+# App code
 COPY server.js .
-RUN npm install
 
+############################
+# Stage 2 – Runtime
+############################
+FROM node:20-alpine
 
+# Create roboshop non-root user
+RUN addgroup -S roboshop && adduser -S roboshop -G roboshop
 
+WORKDIR /app
 
-# App port
+# Copy app from builder
+COPY --from=builder /app /app
+
+# Ownership to roboshop user
+RUN chown -R roboshop:roboshop /app
+
+# Switch to non-root user
+USER roboshop
+
 EXPOSE 8080
 
-# Mongo env vars
+############################
+# Frequently changing configs (KEEP AT BOTTOM)
+############################
 ENV MONGO=true
-ENV MONGO_URL=""mongodb://mongodb:27017/catalogue""
+ENV MONGO_URL=mongodb://mongodb:27017/catalogue
 
-# Start catalogue service
 CMD ["node", "server.js"]
-
-
