@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Copy dependency file
 COPY package.json ./
+COPY server.js ./
 
 # Install dependencies defined by developer
 RUN npm install
