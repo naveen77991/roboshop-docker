@@ -1,9 +1,6 @@
-############################
-# Stage 1 – Prepare frontend
-############################
-FROM nginx:1.24 AS builder
+FROM nginx:1.24
 
-# Remove default nginx config
+# Remove default nginx configuration
 RUN rm -f /etc/nginx/conf.d/default.conf
 
 # Remove default html content
@@ -14,15 +11,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy RoboShop frontend static files
 COPY static/ /usr/share/nginx/html/
-
-############################
-# Stage 2 – Runtime
-############################
-FROM nginx:1.24
-
-# Copy prepared nginx config and static files
-COPY --from=builder /etc/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY --from=builder /usr/share/nginx/html /usr/share/nginx/html
 
 EXPOSE 80
 
