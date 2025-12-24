@@ -1,2 +1,4 @@
 FROM rabbitmq:3-management
 
+ENV RABBITMQ_DEFAULT_USER=roboshop
+ENV RABBITMQ_DEFAULT_PASS=roboshop123
