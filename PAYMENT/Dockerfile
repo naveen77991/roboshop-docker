@@ -1,16 +1,16 @@
 ############################
-# Stage 1 – Build stage
+# Stage 1 – Builder
 ############################
 FROM python:3.9-slim AS builder
 
 WORKDIR /app
 
-# Build tools for uwsgi
+# Install OS deps (uwsgi + python headers)
 RUN apt-get update && \
-    apt-get install -y gcc build-essential python3-dev && \
+    apt-get install -y gcc python3-dev uwsgi uwsgi-plugin-python3 && \
     rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Install Python deps (WITHOUT uwsgi)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -18,13 +18,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ############################
-# Stage 2 – Runtime stage
+# Stage 2 – Runtime
 ############################
 FROM python:3.9-slim
 
 WORKDIR /app
 
-# Application environment variables (UNCHANGED)
+# Runtime environment variables (UNCHANGED)
 ENV CART_HOST=cart
 ENV CART_PORT=8080
 ENV USER_HOST=user
@@ -33,10 +33,10 @@ ENV AMQP_HOST=rabbitmq
 ENV AMQP_USER=roboshop
 ENV AMQP_PASS=roboshop123
 
-# 🔥 COPY PYTHON PACKAGES & UWSGI BINARY
+# Copy python libs + uwsgi binary safely
+COPY --from=builder /usr/lib/uwsgi /usr/lib/uwsgi
+COPY --from=builder /usr/bin/uwsgi /usr/bin/uwsgi
 COPY --from=builder /usr/local /usr/local
-
-# Copy application code
 COPY --from=builder /app /app
 
 EXPOSE 8080
