@@ -5,12 +5,12 @@ FROM python:3.9-slim AS builder
 
 WORKDIR /app
 
-# Install OS deps (uwsgi + python headers)
+# Build tools (for any python wheels)
 RUN apt-get update && \
-    apt-get install -y gcc python3-dev uwsgi uwsgi-plugin-python3 && \
+    apt-get install -y gcc python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python deps (WITHOUT uwsgi)
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -24,7 +24,12 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Runtime environment variables (UNCHANGED)
+# 🔥 Install runtime dependencies (IMPORTANT)
+RUN apt-get update && \
+    apt-get install -y uwsgi uwsgi-plugin-python3 libexpat1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Application environment variables (UNCHANGED)
 ENV CART_HOST=cart
 ENV CART_PORT=8080
 ENV USER_HOST=user
@@ -33,9 +38,7 @@ ENV AMQP_HOST=rabbitmq
 ENV AMQP_USER=roboshop
 ENV AMQP_PASS=roboshop123
 
-# Copy python libs + uwsgi binary safely
-COPY --from=builder /usr/lib/uwsgi /usr/lib/uwsgi
-COPY --from=builder /usr/bin/uwsgi /usr/bin/uwsgi
+# Copy python libs + app code
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
 
