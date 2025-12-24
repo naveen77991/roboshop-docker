@@ -6,11 +6,13 @@ WORKDIR /app
 # Copy dependency file
 COPY package.json ./
 
+COPY server.js ./
+
 # Install dependencies
 RUN npm install
 
 # Copy application code
-COPY server.js ./
+
 
 # 🔴 IMPORTANT FIX (DISABLE INSTANA)
 ENV INSTANA_DISABLED=true
