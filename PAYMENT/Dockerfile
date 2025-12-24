@@ -5,10 +5,15 @@ FROM python:3.9-slim AS builder
 
 WORKDIR /app
 
+# Install build dependencies (REQUIRED for uwsgi)
+RUN apt-get update && \
+    apt-get install -y gcc build-essential python3-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy dependency file
 COPY requirements.txt .
 
-# Install dependencies into virtual location
+# Install python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy full application code
@@ -30,7 +35,7 @@ ENV AMQP_HOST=rabbitmq
 ENV AMQP_USER=roboshop
 ENV AMQP_PASS=roboshop123
 
-# Copy everything from builder (SAFE)
+# Copy everything from builder
 COPY --from=builder /app /app
 
 EXPOSE 8080
