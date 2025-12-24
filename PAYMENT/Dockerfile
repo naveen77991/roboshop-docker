@@ -5,18 +5,16 @@ FROM python:3.9-slim AS builder
 
 WORKDIR /app
 
-# Install build dependencies (REQUIRED for uwsgi)
+# Build tools for uwsgi
 RUN apt-get update && \
     apt-get install -y gcc build-essential python3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy dependency file
+# Install dependencies
 COPY requirements.txt .
-
-# Install python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy full application code
+# Copy application code
 COPY . .
 
 ############################
@@ -35,10 +33,12 @@ ENV AMQP_HOST=rabbitmq
 ENV AMQP_USER=roboshop
 ENV AMQP_PASS=roboshop123
 
-# Copy everything from builder
+# 🔥 COPY PYTHON PACKAGES & UWSGI BINARY
+COPY --from=builder /usr/local /usr/local
+
+# Copy application code
 COPY --from=builder /app /app
 
 EXPOSE 8080
 
-# Start payment service (UNCHANGED)
 CMD ["uwsgi", "--ini", "payment.ini"]
