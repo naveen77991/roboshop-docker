@@ -2,7 +2,7 @@ FROM python:3.9
 
 WORKDIR /app
 
-# Application environment variables (from systemd unit file)
+# Application environment variables
 ENV CART_HOST=cart
 ENV CART_PORT=8080
 ENV USER_HOST=user
@@ -20,5 +20,5 @@ COPY . .
 
 EXPOSE 8080
 
-# Start payment service (Docker replaces systemd)
+# Start payment service
 CMD ["uwsgi", "--ini", "payment.ini"]
